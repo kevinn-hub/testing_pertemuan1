@@ -10,5 +10,11 @@
     "nim": "202401002",
     "nama": "Siti Aminah",
     "jurusan": "Sistem Informasi"
+  },
+  {
+    "id": 3,
+    "nim": "202401003",
+    "nama": "Leonard Kevin Fernando",
+    "jurusan": "Teknik Informatika"
   }
 ]
