@@ -11,17 +11,8 @@ switch ($method) {
         if (isset($_GET['id'])){
             $id = (int) ($_GET['id'] ?? 0);
 
-            $stmt = mysqli_prepare (
-                $koneksi,
-                "SELECT m.id,
-                 m.nama,
-                 m.nim,
-                 j.nama_jurusan AS jurusan
-                 FROM mahasiswa m LEFT JOIN jurusan j
-                 on m.jurusan_id = j.id 
-                 WHERE m.id = ?"
-                );
-            
+            $stmt = mysqli_prepare($koneksi, "SELECT m.id, m.nama, m.nim, j.nama_jurusan as jurusan FROM mahasiswa m LEFT JOIN jurusan j ON m.jurusan_id = j.id WHERE m.id = ?");
+
             mysqli_stmt_bind_param($stmt, "i", $id);
             mysqli_stmt_execute($stmt);
             $r = mysqli_stmt_get_result($stmt);
@@ -41,11 +32,9 @@ switch ($method) {
 
         if (isset($_GET['search'])){
             $search = $_GET['search'] ?? "";
-            //joker LIKE disambung diphp, bukan ditempel di sql
+            $term = "%$search%";
 
-            $term = "%" . $search . "%";
-
-            $stmt = "SELECT m.id, m.nama, m.nim, j.nama_jurusan AS jurusan FROM mahasiswa m LEFT JOIN jurusan j on m.jurusan_id = j.id WHERE m.nama LIKE ? OR m.nim LIKE ? ORDER BY m.id DESC";
+            $stmt = mysqli_prepare($koneksi, "SELECT m.id, m.nama, m.nim, j.nama_jurusan AS jurusan FROM mahasiswa m LEFT JOIN jurusan j on m.jurusan_id = j.id WHERE m.nama LIKE ? OR m.nim LIKE ? ORDER BY m.id DESC");   
             mysqli_stmt_bind_param($stmt, "ss", $term, $term);
             mysqli_stmt_execute($stmt);
             $r = mysqli_stmt_get_result($stmt);
@@ -131,8 +120,12 @@ switch ($method) {
             sendResponse(false, "nim sudah terdaftar", null, 409);
         }
 
-        $q = "INSERT INTO mahasiswa (nama, nim, jurusan_id, created_at) VALUES ('$nama', '$nim', '$jurusan_id', CURDATE())";
-        if (mysqli_query($koneksi, $q)) {
+        $stmt = mysqli_prepare(
+            $koneksi, "INSERT INTO mahasiswa (nama, nim, jurusan_id, created_at) VALUES (?, ?, ?, CURDATE())"
+        );
+        mysqli_stmt_bind_param($stmt, "ssi", $nama, $nim, $jurusan_id);
+        
+        if (mysqli_stmt_execute($stmt)) {
             sendResponse(true, "data tersimpan " , ["id" => mysqli_insert_id($koneksi)], 201);
         } else {
             sendResponse(false, mysqli_error($koneksi), null, 500);
