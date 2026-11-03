@@ -4,7 +4,7 @@ mysqli_report(MYSQLI_REPORT_OFF);
 
 $host = "localhost";
 $user = "root";
-$pass = "root";
+$pass = "";
 $db = "akademik_db";
 
 $koneksi = @mysqli_connect($host, $user, $pass, $db);
